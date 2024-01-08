@@ -114,9 +114,6 @@ func (s *ApiService) GetProjectByCategoryID(w http.ResponseWriter, r *http.Reque
 		http.Error(w, "Invalid userID", http.StatusBadRequest)
 
 	}
-	if err != nil {
-		return err
-	}
 
 	categorys, err := s.store.GetProjectByCategoryID(categoryID)
 
@@ -128,4 +125,47 @@ func (s *ApiService) GetProjectByCategoryID(w http.ResponseWriter, r *http.Reque
 	}
 
 	return WriteJSON(w, 200, categorys)
+}
+
+func (s *ApiService) GetProjectsByOwnerID(w http.ResponseWriter, r *http.Request) error {
+	owner_id_str := chi.URLParam(r, "ownerID")
+
+	// Convert userIDStr to an integer
+	owner_id, err := strconv.Atoi(owner_id_str)
+	if err != nil {
+		// Handle the error (e.g., invalid integer in the URL parameter)
+		http.Error(w, "Invalid userID", http.StatusBadRequest)
+		return err // Return the error to stop further execution
+	}
+
+	categorys, err := s.store.GetProjectByOwnerID(owner_id)
+
+	if err != nil {
+		return WriteJSON(w, 500, map[string]string{
+			"message": err.Error(),
+		})
+	}
+
+	return WriteJSON(w, 200, categorys)
+}
+func (s *ApiService) GetProjectsById(w http.ResponseWriter, r *http.Request) error {
+	project_id_str := chi.URLParam(r, "project_id")
+
+	// Convert userIDStr to an integer
+	project_id, err := strconv.Atoi(project_id_str)
+	if err != nil {
+		// Handle the error (e.g., invalid integer in the URL parameter)
+		http.Error(w, "Invalid userID", http.StatusBadRequest)
+		return err // Return the error to stop further execution
+	}
+
+	project, err := s.store.GetProjectByID(project_id)
+
+	if err != nil {
+		return WriteJSON(w, 500, map[string]string{
+			"message": err.Error(),
+		})
+	}
+
+	return WriteJSON(w, 200, project)
 }

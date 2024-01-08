@@ -26,6 +26,17 @@ const (
 	  RETURNING id, username, email, password, balance,is_admin, is_active, deactivated_at, is_deleted, deleted_at, created_at
 	  
 	`
+
+	createOffer = `INSERT INTO offers (
+		customer_id,customer_note,
+		owner_id, project_id, price,
+		status
+	  ) VALUES (
+		$1, $2, $3,$4,$5,$6
+	  )
+	  RETURNING id
+	  
+	`
 )
 
 type CreateUserParams struct {

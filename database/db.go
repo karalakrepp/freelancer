@@ -34,6 +34,16 @@ type Storage interface {
 	CreateProject(*models.CreateProject, string, string) (int, error)
 	GetAllProject() ([]models.FilterNeededData, error)
 	GetProjectByCategoryID(int) (*[]models.FilterNeededData, error)
+	GetProjectByOwnerID(int) (*[]models.FilterNeededData, error)
+	GetProjectByID(int) (*models.FilterNeededData, error)
+
+	//offer
+	CreateOffer(*models.Offer) (int64, error)
+	GetAllOfferByOwnerId(int) (*[]models.Offer, error)
+	GetAllOfferByCustomerId(int) (*[]models.Offer, error)
+
+	//Skills
+	GetAllSkills() ([]models.UserSkills, error)
 }
 
 func NewPostgresStore() (*PostgresStore, error) {
@@ -109,6 +119,23 @@ func (s *PostgresStore) createAccountTable() error {
 		FOREIGN KEY (category_id) REFERENCES category(id) 
 	);
 	
+	CREATE TABLE IF NOT EXISTS offers (
+		id SERIAL PRIMARY KEY,
+		customer_id INT NOT NULL,
+		customer_note TEXT,
+		owner_id INT NOT NULL,
+		project_id INT NOT NULL,
+		price INT NOT NULL,
+		status VARCHAR(255) NOT NULL,
+		FOREIGN KEY (project_id) REFERENCES projects(id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS skills (
+		ID SERIAL PRIMARY KEY,
+		Name VARCHAR(255) NOT NULL,
+		Created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		Updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	);
 		
 		
 		

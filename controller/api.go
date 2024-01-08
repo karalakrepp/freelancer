@@ -49,7 +49,17 @@ func (s *ApiService) userRouter(router chi.Router) {
 
 	router.HandleFunc("/api/v1/profile/{id}", WithJWTAuth(makeHTTPHandleFunc(s.handleAccount), s.store, s.maker))
 	router.HandleFunc("/api/v1/project", WithJWTAuth(makeHTTPHandleFunc(s.handleProject), s.store, s.maker))
+
 	router.HandleFunc("/api/v1/project/{categoryID}", WithJWTAuth(makeHTTPHandleFunc(s.GetProjectByCategoryID), s.store, s.maker))
+
+	router.Get("/api/v1/ownproject/{ownerID}", makeHTTPHandleFunc(s.GetProjectsByOwnerID))
+	router.Get("/api/v1/projectbyid/{project_id}", makeHTTPHandleFunc(s.GetProjectsById))
+
+	router.Post("/api/v1/offer/{projectID}", WithJWTAuth(makeHTTPHandleFunc(s.addOffer), s.store, s.maker))
+
+	router.Get("/api/v1/getoffer", WithJWTAuth(makeHTTPHandleFunc(s.getOfferByOwnerId), s.store, s.maker))
+
+	router.Get("/api/v1/getorders", WithJWTAuth(makeHTTPHandleFunc(s.getOfferByCustomerID), s.store, s.maker))
 
 }
 

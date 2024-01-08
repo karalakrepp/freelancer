@@ -1,6 +1,7 @@
 package database
 
 import (
+	"database/sql"
 	"errors"
 
 	"github.com/karalakrepp/Golang/freelancer-project/models"
@@ -76,6 +77,61 @@ func (s *PostgresStore) GetProjectByCategoryID(categoryID int) (*[]models.Filter
 	}
 
 	return &allData, nil
+}
+
+func (s *PostgresStore) GetProjectByOwnerID(owner_id int) (*[]models.FilterNeededData, error) {
+
+	var allData []models.FilterNeededData
+
+	query := "SELECT id, title, description, skills_id, category_id, owner_id from projects WHERE owner_id =$1"
+
+	rows, err := s.DB.Query(query, owner_id)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var dbData models.FilterNeededData
+		if err := rows.Scan(&dbData.ID, &dbData.Title, &dbData.Description, &dbData.Skill, &dbData.Category, &dbData.Owner.ID); err != nil {
+			return &[]models.FilterNeededData{}, err
+		}
+		allData = append(allData, dbData)
+	}
+
+	// rows.Err() ile olası bir tarama hatasını kontrol et
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// rows.Next() içindeki tarama hatasını kontrol et
+	if len(allData) == 0 {
+		return nil, errors.New("no projects found for the given category ID")
+	}
+
+	return &allData, nil
+}
+
+func (s *PostgresStore) GetProjectByID(project_id int) (*models.FilterNeededData, error) {
+
+	query := "SELECT id, title, description, skills_id, category_id, owner_id,price from projects WHERE id =$1"
+
+	row := s.DB.QueryRow(query, project_id)
+
+	var dbData models.FilterNeededData
+
+	// Scan the values from the row into the variables
+	if err := row.Scan(&dbData.ID, &dbData.Title, &dbData.Description, &dbData.Skill, &dbData.Category, &dbData.Owner.ID, &dbData.Price); err != nil {
+		// Handle the error, e.g., if no rows were found
+		if err == sql.ErrNoRows {
+			return nil, errors.New("no project found for the given project ID")
+		}
+		return nil, err
+	}
+
+	// Return the single row of data
+	return &dbData, nil
 }
 
 // Update Project
