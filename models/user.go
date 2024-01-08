@@ -30,12 +30,11 @@ type UserProfile struct {
 	Owner  OwnerInfo `json:"owner"`
 	UserID int       `json:"user_id"`
 	//hakkinda
-	Description string `json:"description"`
-	Title       string `json:"title"`
-	Skill       string `json:"skill"`
-	Picture     string `json:"picture"`
-
-	ProjectCompleted int `json:"projectCompleted"`
+	Description      string       `json:"description"`
+	Title            string       `json:"title"`
+	Skill            []UserSkills `json:"skill"`
+	Picture          string       `json:"picture"`
+	ProjectCompleted int          `json:"projectCompleted"`
 }
 type CreateUserRequest struct {
 	FirstName   string `json:"firstName"`

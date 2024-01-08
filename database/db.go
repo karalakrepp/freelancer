@@ -22,8 +22,8 @@ type Storage interface {
 	GetUserByEmail(string) (*models.User, error)
 	GetUserByID(int) (*models.User, error)
 
-	CreateProfile(models.CreateUserProfileReq) (*models.UserProfile, error)
-	GetProfile(int) (*models.UserProfile, error)
+	CreateProfile(models.CreateUserProfileReq, string) (*models.UserProfile, error)
+	GetProfile(int) (*models.QueryUserProfile, error)
 	UpdateProfile(int, *models.UpdateProfile) (int, error)
 
 	CreateCategory(models.Category) (int64, error)
@@ -31,19 +31,25 @@ type Storage interface {
 	GetCategoryRow() (*[]models.Category, error)
 
 	IsThisCategoryIDExist(id int) error
+
 	CreateProject(*models.CreateProject, string, string) (int, error)
 	GetAllProject() ([]models.FilterNeededData, error)
 	GetProjectByCategoryID(int) (*[]models.FilterNeededData, error)
 	GetProjectByOwnerID(int) (*[]models.FilterNeededData, error)
 	GetProjectByID(int) (*models.FilterNeededData, error)
 
+	GetUserCompletedProject(id int) (int, error)
+
 	//offer
 	CreateOffer(*models.Offer) (int64, error)
 	GetAllOfferByOwnerId(int) (*[]models.Offer, error)
 	GetAllOfferByCustomerId(int) (*[]models.Offer, error)
+	OfferIsDone(int) error
+	IsThisYourOffer(int, int) bool
 
 	//Skills
 	GetAllSkills() ([]models.UserSkills, error)
+	UserSkills(id string) ([]models.UserSkills, error)
 }
 
 func NewPostgresStore() (*PostgresStore, error) {

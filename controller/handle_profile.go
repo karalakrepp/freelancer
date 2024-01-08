@@ -2,9 +2,11 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/karalakrepp/Golang/freelancer-project/helper"
@@ -12,7 +14,7 @@ import (
 )
 
 func (s *ApiService) CreateUserProfile(w http.ResponseWriter, r *http.Request) error {
-	userIDStr := chi.URLParam(r, "id")
+	userIDStr := idToken
 
 	// Convert userIDStr to an integer
 	userID, err := strconv.Atoi(userIDStr)
@@ -33,7 +35,10 @@ func (s *ApiService) CreateUserProfile(w http.ResponseWriter, r *http.Request) e
 	if err != nil {
 		return json.NewEncoder(w).Encode(err)
 	}
-	profile, err := s.store.CreateProfile(*req)
+
+	skillDataQuery := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(req.Skills)), ","), "[]")
+	fmt.Printf("skiils : %s", skillDataQuery)
+	profile, err := s.store.CreateProfile(*req, skillDataQuery)
 	if err != nil {
 		return json.NewEncoder(w).Encode(err)
 	}
@@ -45,12 +50,13 @@ func (s *ApiService) CreateUserProfile(w http.ResponseWriter, r *http.Request) e
 	if err != nil {
 		return err
 	}
-	return json.NewEncoder(w).Encode(profile)
+	return json.NewEncoder(w).Encode("created succs")
 
 }
 func (s *ApiService) GetUserProfile(w http.ResponseWriter, r *http.Request) error {
-	userIDStr := chi.URLParam(r, "id")
 
+	userIDStr := idToken
+	var data models.UserProfile
 	// Convert userIDStr to an integer
 	userID, err := strconv.Atoi(userIDStr)
 	if err != nil {
@@ -67,15 +73,35 @@ func (s *ApiService) GetUserProfile(w http.ResponseWriter, r *http.Request) erro
 	if err != nil {
 		return err
 	}
-
-	profile.Owner.FirstName = user.FirstName
-	profile.Owner.LastName = user.LastName
-	profile.Owner.Email = user.Email
-	profile.Owner.Location = user.Location.CountryName
+	projectCompleted, err := s.store.GetUserCompletedProject(userID)
 	if err != nil {
 		return err
 	}
-	return WriteJSON(w, 200, profile)
+
+	skillData, err := s.store.UserSkills(profile.Skills)
+
+	if err != nil {
+		return WriteJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+
+	}
+
+	data.Owner.FirstName = user.FirstName
+	data.Owner.LastName = user.LastName
+	data.Owner.Email = user.Email
+	data.Owner.Location = user.Location.CountryName
+	data.ProjectCompleted = projectCompleted
+	data.Skill = skillData
+	data.UserID = userID
+	data.Description = profile.Description
+	data.Title = profile.Title
+	data.Picture = profile.Picture
+
+	if err != nil {
+		return err
+	}
+	return WriteJSON(w, 200, data)
 
 }
 

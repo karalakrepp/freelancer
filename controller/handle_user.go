@@ -93,6 +93,9 @@ func (s *ApiService) handleAccount(w http.ResponseWriter, r *http.Request) error
 	if r.Method == "POST" {
 		return s.CreateUserProfile(w, r)
 	}
+	if r.Method == "PUT" {
+		return s.UpdateProfileSection(w, r)
+	}
 
 	return fmt.Errorf("method not allowed %s", r.Method)
 

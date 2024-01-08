@@ -47,7 +47,7 @@ func (s *ApiService) authRouter(router chi.Router) {
 
 func (s *ApiService) userRouter(router chi.Router) {
 
-	router.HandleFunc("/api/v1/profile/{id}", WithJWTAuth(makeHTTPHandleFunc(s.handleAccount), s.store, s.maker))
+	router.HandleFunc("/api/v1/profile", WithJWTAuth(makeHTTPHandleFunc(s.handleAccount), s.store, s.maker))
 	router.HandleFunc("/api/v1/project", WithJWTAuth(makeHTTPHandleFunc(s.handleProject), s.store, s.maker))
 
 	router.HandleFunc("/api/v1/project/{categoryID}", WithJWTAuth(makeHTTPHandleFunc(s.GetProjectByCategoryID), s.store, s.maker))
@@ -58,6 +58,8 @@ func (s *ApiService) userRouter(router chi.Router) {
 	router.Post("/api/v1/offer/{projectID}", WithJWTAuth(makeHTTPHandleFunc(s.addOffer), s.store, s.maker))
 
 	router.Get("/api/v1/getoffer", WithJWTAuth(makeHTTPHandleFunc(s.getOfferByOwnerId), s.store, s.maker))
+
+	router.Post("/api/v1/offer-status/{offerID}", WithJWTAuth(makeHTTPHandleFunc(s.offerIsDone), s.store, s.maker))
 
 	router.Get("/api/v1/getorders", WithJWTAuth(makeHTTPHandleFunc(s.getOfferByCustomerID), s.store, s.maker))
 

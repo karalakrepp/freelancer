@@ -5,11 +5,23 @@ type CreateUserProfileReq struct {
 	UserID      int    `json:"user_id"`
 	Description string `json:"description"`
 	Title       string `json:"title"`
-	Skill       string `json:"skill"`
+	Skills      []int  `json:"skill"`
 	Picture     string `json:"picture"`
 }
 
 type UpdateProfile struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
+}
+type QueryUserProfile struct {
+	ID          int
+	Owner       OwnerInfo
+	UserID      int
+	Description string
+	Title       string
+	Picture     string
+
+	Skills string
+
+	ProjectCompleted int
 }

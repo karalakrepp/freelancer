@@ -99,3 +99,41 @@ func (s *PostgresStore) GetAllOfferByCustomerId(customerId int) (*[]models.Offer
 
 	return &allData, nil
 }
+func (s *PostgresStore) OfferIsDone(offerid int) error {
+
+	query := "UPDATE offers SET status = 'Done' WHERE id =$1"
+
+	_, err := s.DB.Exec(query, offerid)
+
+	if err != nil {
+		return err
+
+	}
+
+	return nil
+
+}
+
+func (s *PostgresStore) IsThisYourOffer(offerID int, ownerID int) bool {
+	row := s.DB.QueryRow("SELECT owner_id FROM offers WHERE id = $1 AND owner_id = $2", offerID, ownerID)
+
+	var foundOwnerID int
+	err := row.Scan(&foundOwnerID)
+	if err != nil {
+		return false
+	}
+
+	// If a row is found, and ownerID matches foundOwnerID, it is the user's offer
+	return foundOwnerID == ownerID
+}
+
+func (s *PostgresStore) GetUserCompletedProject(id int) (int, error) {
+	var count int
+	err := s.DB.QueryRow("SELECT COUNT(*) FROM offers WHERE owner_id=$1 AND status='Done'", id).Scan(&count)
+
+	if err != nil {
+		return -1, errors.New("server unable to execute query to database")
+	}
+
+	return count, nil
+}
