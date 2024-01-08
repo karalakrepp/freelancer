@@ -61,6 +61,8 @@ func (s *ApiService) userRouter(router chi.Router) {
 
 	router.Get("/api/v1/getorders", WithJWTAuth(makeHTTPHandleFunc(s.getOfferByCustomerID), s.store, s.maker))
 
+	router.Get("/api/v1/getskills", WithJWTAuth(makeHTTPHandleFunc(s.getAllSkills), s.store, s.maker))
+
 }
 
 func (s *ApiService) Routes() {

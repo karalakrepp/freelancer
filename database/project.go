@@ -40,7 +40,7 @@ func (s *PostgresStore) GetAllProject() ([]models.FilterNeededData, error) {
 	for rows.Next() {
 		var dbData models.FilterNeededData
 		if err := rows.Scan(&dbData.ID, &dbData.Title, &dbData.Description, &dbData.Owner.ID, &dbData.Skill, &dbData.Price, &dbData.Category); err != nil {
-			return []models.FilterNeededData{}, errors.New("Something is wrong with the database data")
+			return []models.FilterNeededData{}, errors.New("something is wrong with the database data")
 		}
 
 		allData = append(allData, dbData)
