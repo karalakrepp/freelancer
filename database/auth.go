@@ -129,3 +129,16 @@ func (s *PostgresStore) GetUserByID(user_id int) (*models.User, error) {
 	return nil, fmt.Errorf("account with number [%d] not found", user_id)
 
 }
+
+func (s *PostgresStore) UpdateBalance(userID int, newBalance float64) error {
+	// SQL sorgusu
+	sqlStatement := `UPDATE laccounts SET balance = $1 WHERE id = $2;`
+
+	// Sorguyu hazırla ve çalıştır
+	_, err := s.DB.Exec(sqlStatement, newBalance, userID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

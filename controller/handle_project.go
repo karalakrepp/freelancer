@@ -13,18 +13,6 @@ import (
 	"github.com/karalakrepp/Golang/freelancer-project/models"
 )
 
-var databases = database.PostgresStore{}
-
-func (s *ApiService) handleProject(w http.ResponseWriter, r *http.Request) error {
-	if r.Method == "POST" {
-		return s.AddProject(w, r)
-	}
-	if r.Method == "GET" {
-		return s.handleGetProject(w, r)
-	}
-	return WriteJSON(w, 400, "Permision Denied")
-}
-
 func (s *ApiService) AddProject(w http.ResponseWriter, r *http.Request) error {
 	id := idToken
 

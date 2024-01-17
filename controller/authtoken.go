@@ -1,13 +1,13 @@
 package controller
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/golang-jwt/jwt"
 	"github.com/karalakrepp/Golang/freelancer-project/database"
 	"github.com/karalakrepp/Golang/freelancer-project/token"
@@ -16,6 +16,12 @@ import (
 type ApiError struct {
 	Error string `json:"error"`
 }
+
+type ctxKeyType string
+
+const (
+	ctxKey ctxKeyType = "myContextKey"
+)
 
 var idToken string
 
@@ -54,9 +60,9 @@ func WithJWTAuth(handlerFunc http.HandlerFunc, st database.Storage, mk token.Mak
 			fmt.Println("cant find id")
 			return
 		}
-		fmt.Println("acc:", acc)
+
 		claims := token.Claims.(jwt.MapClaims)
-		fmt.Println("claims:", claims)
+
 		if acc.Email != claims["email"] {
 			w.WriteHeader(400)
 			permissionDenied(w)
@@ -71,21 +77,15 @@ func WithJWTAuth(handlerFunc http.HandlerFunc, st database.Storage, mk token.Mak
 		// r = r.WithContext(ctx)
 		idstr := strconv.Itoa(userId)
 		idToken = idstr
+		ctx := context.WithValue(r.Context(), ctxKey, idToken)
+		r = r.WithContext(ctx)
+
+		fmt.Println(r.Context().Value(ctxKey))
+
 		handlerFunc(w, r)
 	}
 }
 
 func permissionDenied(w http.ResponseWriter) {
 	WriteJSON(w, http.StatusForbidden, ApiError{Error: "permission denied"})
-}
-
-func getID(r *http.Request) (int, error) {
-	userIDStr := chi.URLParam(r, "id")
-
-	// Convert userIDStr to an integer
-	userID, err := strconv.Atoi(userIDStr)
-	if err != nil {
-		return userID, fmt.Errorf("invalid id given %s", userIDStr)
-	}
-	return userID, nil
 }

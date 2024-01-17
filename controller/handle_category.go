@@ -3,11 +3,28 @@ package controller
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/karalakrepp/Golang/freelancer-project/models"
 )
 
 func (s *ApiService) CreateCategory(w http.ResponseWriter, r *http.Request) error {
+
+	id, err := strconv.Atoi(idToken)
+	if err != nil {
+		permissionDenied(w)
+
+	}
+	user, err := s.store.GetUserByID(id)
+	if err != nil {
+		permissionDenied(w)
+
+	}
+
+	if !user.IsAdmin {
+		permissionDenied(w)
+	}
 
 	var req = new(models.Category)
 
@@ -31,17 +48,19 @@ func (s *ApiService) CreateCategory(w http.ResponseWriter, r *http.Request) erro
 
 func (s *ApiService) GetCategoryByParentId(w http.ResponseWriter, r *http.Request) error {
 
-	var req = new(models.GetCategoryByParentIdReq)
+	idstr := chi.URLParam(r, "categoryID")
 
-	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		return err
+	id, err := strconv.Atoi(idstr)
+
+	if err != nil {
+		WriteJSON(w, 500, err)
 	}
 
-	category, err := s.store.GetCategoryByParentId(req.ParentID)
+	category, err := s.store.GetCategoryByParentId(id)
 
 	if err != nil {
 		return WriteJSON(w, 500, map[string]string{
-			"message": "Server is unable to execute query to the database",
+			"message": "parent not found",
 		})
 
 	}

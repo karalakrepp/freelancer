@@ -1,6 +1,7 @@
 package database
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 
@@ -49,7 +50,7 @@ func (s *PostgresStore) GetAllOfferByOwnerId(ownerId int) (*[]models.Offer, erro
 
 	for rows.Next() {
 		var dbData models.Offer
-		if err := rows.Scan(&dbData.ID, &dbData.CustomerID, &dbData.CustomerNote, &dbData.ProjectOwnerID, &dbData.ProjectID, &dbData.Status, &dbData.Price); err != nil {
+		if err := rows.Scan(&dbData.ID, &dbData.CustomerID, &dbData.CustomerNote, &dbData.ProjectOwnerID, &dbData.ProjectID, &dbData.Price, &dbData.Status); err != nil {
 			return &[]models.Offer{}, err
 		}
 		allData = append(allData, dbData)
@@ -99,6 +100,19 @@ func (s *PostgresStore) GetAllOfferByCustomerId(customerId int) (*[]models.Offer
 
 	return &allData, nil
 }
+func (s *PostgresStore) GetOfferById(offer_id int) (*models.Offer, error) {
+	rows, err := s.DB.Query("SELECT * FROM offers WHERE id = $1", offer_id)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		return scanIntoOffer(rows)
+	}
+
+	return nil, fmt.Errorf("offer with ID [%d] not found", offer_id)
+}
+
 func (s *PostgresStore) OfferIsDone(offerid int) error {
 
 	query := "UPDATE offers SET status = 'Done' WHERE id =$1"
@@ -136,4 +150,48 @@ func (s *PostgresStore) GetUserCompletedProject(id int) (int, error) {
 	}
 
 	return count, nil
+}
+
+func (s *PostgresStore) GetCustomersOfferDone(customer_id int) (*[]models.Offer, error) {
+
+	query := "Select * from offers where customer_id =$1 AND  status='Done'"
+
+	var allData []models.Offer
+	rows, err := s.DB.Query(query, customer_id)
+
+	if err != nil {
+		return &[]models.Offer{}, err
+	}
+
+	for rows.Next() {
+		var dbData models.Offer
+
+		if err := rows.Scan(&dbData.ID, &dbData.CustomerID, &dbData.CustomerNote, &dbData.ProjectOwnerID, &dbData.ProjectID, &dbData.Price, &dbData.Status); err != nil {
+			return &[]models.Offer{}, err
+		}
+		allData = append(allData, dbData)
+
+	}
+	return &allData, nil
+
+}
+func scanIntoOffer(rows *sql.Rows) (*models.Offer, error) {
+
+	var i models.Offer
+	err := rows.Scan(
+		&i.ID,
+		&i.CustomerID,
+		&i.CustomerNote,
+		&i.ProjectOwnerID,
+		&i.ProjectID,
+		&i.Price,
+		&i.Status,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Handle nil slice
+
+	return &i, err
 }

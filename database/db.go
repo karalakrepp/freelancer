@@ -26,6 +26,8 @@ type Storage interface {
 	GetProfile(int) (*models.QueryUserProfile, error)
 	UpdateProfile(int, *models.UpdateProfile) (int, error)
 
+	UpdateBalance(userID int, newBalance float64) error
+
 	CreateCategory(models.Category) (int64, error)
 	GetCategoryByParentId(int) (*models.Category, error)
 	GetCategoryRow() (*[]models.Category, error)
@@ -46,7 +48,14 @@ type Storage interface {
 	GetAllOfferByCustomerId(int) (*[]models.Offer, error)
 	OfferIsDone(int) error
 	IsThisYourOffer(int, int) bool
+	GetCustomersOfferDone(int) (*[]models.Offer, error)
 
+	GetOfferById(int) (*models.Offer, error)
+
+	//Project Links
+	AddProjectLinks(*models.Offer, bool) error
+	IsCustomerOk(id int) error
+	GetProjectLink(id int) (*models.ProjectLink, error)
 	//Skills
 	GetAllSkills() ([]models.UserSkills, error)
 	UserSkills(id string) ([]models.UserSkills, error)
@@ -107,6 +116,21 @@ func (s *PostgresStore) createAccountTable() error {
 		parentid INTEGER NOT NULL,
 	
 		name varchar(100)
+	
+	);
+
+	CREATE TABLE IF NOT EXISTS project_link (
+		id SERIAL PRIMARY KEY,
+
+
+		project_id INTEGER NOT NULL,
+		offer_id   INTEGER NOT NULL,
+
+		isCustomerOk bool default false,
+		isOwnerOk    bool default false,
+
+		FOREIGN KEY (offer_id) REFERENCES offers(id)
+		
 	
 	);
 		

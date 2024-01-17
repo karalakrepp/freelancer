@@ -48,23 +48,24 @@ func (s *ApiService) authRouter(router chi.Router) {
 func (s *ApiService) userRouter(router chi.Router) {
 
 	router.HandleFunc("/api/v1/profile", WithJWTAuth(makeHTTPHandleFunc(s.handleAccount), s.store, s.maker))
-	router.HandleFunc("/api/v1/project", WithJWTAuth(makeHTTPHandleFunc(s.handleProject), s.store, s.maker))
 
-	router.HandleFunc("/api/v1/project/{categoryID}", WithJWTAuth(makeHTTPHandleFunc(s.GetProjectByCategoryID), s.store, s.maker))
+	router.Get("/api/v1/category/getall", makeHTTPHandleFunc(s.GetAllCategories))
+	router.Get("/api/v1/category/getsub/{categoryID}", makeHTTPHandleFunc(s.GetCategoryByParentId))
 
+	router.Get("/api/v1/project/{categoryID}", makeHTTPHandleFunc(s.GetProjectByCategoryID))
+	router.Get("/api/v1/projects", makeHTTPHandleFunc(s.handleGetProject))
+	router.Post("/api/v1/project", WithJWTAuth(makeHTTPHandleFunc(s.AddProject), s.store, s.maker))
 	router.Get("/api/v1/ownproject/{ownerID}", makeHTTPHandleFunc(s.GetProjectsByOwnerID))
 	router.Get("/api/v1/projectbyid/{project_id}", makeHTTPHandleFunc(s.GetProjectsById))
 
 	router.Post("/api/v1/offer/{projectID}", WithJWTAuth(makeHTTPHandleFunc(s.addOffer), s.store, s.maker))
-
 	router.Get("/api/v1/getoffer", WithJWTAuth(makeHTTPHandleFunc(s.getOfferByOwnerId), s.store, s.maker))
-
-	router.Post("/api/v1/offer-status/{offerID}", WithJWTAuth(makeHTTPHandleFunc(s.offerIsDone), s.store, s.maker))
-
+	router.Put("/api/v1/offer-status/{offerID}", WithJWTAuth(makeHTTPHandleFunc(s.offerIsDone), s.store, s.maker))
 	router.Get("/api/v1/getorders", WithJWTAuth(makeHTTPHandleFunc(s.getOfferByCustomerID), s.store, s.maker))
+	router.Get("/api/v1/getcustomer-offers-done", WithJWTAuth(makeHTTPHandleFunc(s.getDoneOfferByCustomer), s.store, s.maker))
+	router.Put("/api/v1/everythingdone/{id}", WithJWTAuth(makeHTTPHandleFunc(s.customerIsOK), s.store, s.maker))
 
-	router.Get("/api/v1/getskills", WithJWTAuth(makeHTTPHandleFunc(s.getAllSkills), s.store, s.maker))
-
+	router.Get("/api/v1/getskills", (makeHTTPHandleFunc(s.getAllSkills)))
 }
 
 func (s *ApiService) Routes() {
@@ -93,7 +94,7 @@ func (s *ApiService) Routes() {
 	router.Group(func(r chi.Router) {
 
 		// Admin rotaları
-		r.Post("/api/v1/admin/category", makeHTTPHandleFunc(s.CreateCategory))
+		r.Post("/api/v1/admin/category", WithJWTAuth((makeHTTPHandleFunc(s.CreateCategory)), s.store, s.maker))
 	})
 
 	// Tüm kullanıcılara açık kategori rotaları

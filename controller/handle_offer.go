@@ -129,5 +129,94 @@ func (s *ApiService) offerIsDone(w http.ResponseWriter, r *http.Request) error {
 		return WriteJSON(w, http.StatusInternalServerError, map[string]interface{}{"error": "Internal Server Error"})
 	}
 
+	//add project_links for  customers approval
+
+	offer, err := s.store.GetOfferById(offerID)
+	if err != nil {
+		return WriteJSON(w, http.StatusInternalServerError, map[string]interface{}{"error": "Internal Server Error"})
+	}
+	if err := s.store.AddProjectLinks(offer, true); err != nil {
+		return err
+	}
 	return WriteJSON(w, http.StatusOK, map[string]interface{}{"message": "Offer status updated to 'Done'"})
+}
+
+//get all done offer
+
+func (s *ApiService) getDoneOfferByCustomer(w http.ResponseWriter, r *http.Request) error {
+	var customerIdstr = idToken
+
+	customerId, err := strconv.Atoi(customerIdstr)
+
+	if err != nil {
+		return err
+	}
+
+	offers, err := s.store.GetCustomersOfferDone(customerId)
+
+	if err != nil {
+		return err
+	}
+
+	return WriteJSON(w, 200, offers)
+}
+
+func (s *ApiService) customerIsOK(w http.ResponseWriter, r *http.Request) error {
+	project_id_str := chi.URLParam(r, "id")
+
+	id, err := strconv.Atoi(project_id_str)
+	if err != nil {
+		return WriteJSON(w, 400, err)
+	}
+
+	if err := s.store.IsCustomerOk(id); err != nil {
+		return WriteJSON(w, 500, err)
+	}
+
+	//get offer
+	link, err := s.store.GetProjectLink(id)
+
+	if link.IsCustomerOk {
+		return WriteJSON(w, 400, map[string]interface{}{
+			"message": "Your order already confirmed",
+		})
+	}
+
+	if err != nil {
+		return WriteJSON(w, 500, err)
+	}
+
+	offer, err := s.store.GetOfferById(link.OfferID)
+	if err != nil {
+		return WriteJSON(w, 500, err)
+	}
+
+	//get offers profile
+
+	offer_profile, err := s.store.GetUserByID(offer.CustomerID)
+	if err != nil {
+		return WriteJSON(w, 500, err)
+	}
+	fmt.Println(offer_profile)
+
+	project_owner_profile, err := s.store.GetUserByID(offer.ProjectOwnerID)
+	if err != nil {
+		return WriteJSON(w, 500, err)
+	}
+
+	//payment it is simple paymnet with db
+	if err := s.store.UpdateBalance(offer.CustomerID, offer_profile.Balance-offer.Price); err != nil {
+		return WriteJSON(w, 500, err)
+	}
+
+	// Corrected the parameter here to use offer.ProjectOwnerID
+	errs := s.store.UpdateBalance(offer.ProjectOwnerID, project_owner_profile.Balance+offer.Price)
+	if errs != nil {
+		return WriteJSON(w, 500, errs)
+	}
+
+	return WriteJSON(w, 200, map[string]interface{}{
+		"message": "proccess succesfull",
+	})
+
 }

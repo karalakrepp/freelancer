@@ -25,6 +25,14 @@ type Project struct {
 	Created_At time.Time `json:"_"`
 }
 
+type ProjectLink struct {
+	ID           int
+	ProjectID    int
+	OfferID      int
+	IsCustomerOk bool
+	IsOwnerOk    bool
+}
+
 type CreateProject struct {
 	ID          int       `json:"id"`
 	Title       string    `json:"title"`

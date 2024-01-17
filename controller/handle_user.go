@@ -50,16 +50,16 @@ func (s *ApiService) Login(w http.ResponseWriter, r *http.Request) error {
 
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 		fmt.Println("hata")
-		log.Fatal(err)
+		log.Println(err)
 	}
 	user, err := s.store.GetUserByEmail(req.Email)
 	if err != nil {
-		log.Fatal("email does not match")
+		log.Println("email does not match")
 	}
 
 	err = util.CheckPassword(req.Password, user.Password)
 	if err != nil {
-		log.Fatal("pass does not match")
+		log.Println("pass does not match")
 	}
 
 	token, err := s.maker.CreateToken(user)

@@ -62,24 +62,3 @@ func scanIntoAccountsProfile(rows *sql.Rows) (*models.QueryUserProfile, error) {
 
 	return &i, err
 }
-
-func scanIntoAccountProfile(rows *sql.Rows) (*models.UserProfile, error) {
-
-	var i models.UserProfile
-	err := rows.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.Description,
-		&i.Title,
-		&i.Skill,
-		&i.Picture,
-		&i.ProjectCompleted,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	// Handle nil slice
-
-	return &i, err
-}
