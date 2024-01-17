@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"errors"
+	"log"
 
 	"github.com/karalakrepp/Golang/freelancer-project/models"
 )
@@ -115,14 +116,14 @@ func (s *PostgresStore) GetProjectByOwnerID(owner_id int) (*[]models.FilterNeede
 
 func (s *PostgresStore) GetProjectByID(project_id int) (*models.FilterNeededData, error) {
 
-	query := "SELECT id, title, description, skills_id, category_id, owner_id,price from projects WHERE id =$1"
+	query := "SELECT id, title, description, skills_id, category_id, owner_id,price,status from projects WHERE id =$1"
 
 	row := s.DB.QueryRow(query, project_id)
 
 	var dbData models.FilterNeededData
 
 	// Scan the values from the row into the variables
-	if err := row.Scan(&dbData.ID, &dbData.Title, &dbData.Description, &dbData.Skill, &dbData.Category, &dbData.Owner.ID, &dbData.Price); err != nil {
+	if err := row.Scan(&dbData.ID, &dbData.Title, &dbData.Description, &dbData.Skill, &dbData.Category, &dbData.Owner.ID, &dbData.Price, &dbData.Status); err != nil {
 		// Handle the error, e.g., if no rows were found
 		if err == sql.ErrNoRows {
 			return nil, errors.New("no project found for the given project ID")
@@ -137,3 +138,16 @@ func (s *PostgresStore) GetProjectByID(project_id int) (*models.FilterNeededData
 // Update Project
 
 // Delete Project
+func (s *PostgresStore) DeleteProject(project_id int) error {
+	query := "DELETE FROM projects WHERE id = $1"
+
+	_, err := s.DB.Exec(query, project_id)
+	if err != nil {
+		// Log the error for debugging purposes
+		log.Printf("Error deleting project with ID %d: %s", project_id, err)
+		return err
+	}
+
+	// Return nil if the deletion was successful
+	return nil
+}

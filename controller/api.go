@@ -52,11 +52,14 @@ func (s *ApiService) userRouter(router chi.Router) {
 	router.Get("/api/v1/category/getall", makeHTTPHandleFunc(s.GetAllCategories))
 	router.Get("/api/v1/category/getsub/{categoryID}", makeHTTPHandleFunc(s.GetCategoryByParentId))
 
-	router.Get("/api/v1/project/{categoryID}", makeHTTPHandleFunc(s.GetProjectByCategoryID))
-	router.Get("/api/v1/projects", makeHTTPHandleFunc(s.handleGetProject))
-	router.Post("/api/v1/project", WithJWTAuth(makeHTTPHandleFunc(s.AddProject), s.store, s.maker))
 	router.Get("/api/v1/ownproject/{ownerID}", makeHTTPHandleFunc(s.GetProjectsByOwnerID))
 	router.Get("/api/v1/projectbyid/{project_id}", makeHTTPHandleFunc(s.GetProjectsById))
+	router.Get("/api/v1/project/{categoryID}", makeHTTPHandleFunc(s.GetProjectByCategoryID))
+	router.Get("/api/v1/projects", makeHTTPHandleFunc(s.handleGetProject))
+
+	router.Post("/api/v1/project", WithJWTAuth(makeHTTPHandleFunc(s.AddProject), s.store, s.maker))
+	router.Put("/api/v1/project/{projectId}", WithJWTAuth(makeHTTPHandleFunc(s.EditProject), s.store, s.maker))
+	router.Delete("/api/v1/project/{projecId}", WithJWTAuth(makeHTTPHandleFunc(s.DeleteProject), s.store, s.maker))
 
 	router.Post("/api/v1/offer/{projectID}", WithJWTAuth(makeHTTPHandleFunc(s.addOffer), s.store, s.maker))
 	router.Get("/api/v1/getoffer", WithJWTAuth(makeHTTPHandleFunc(s.getOfferByOwnerId), s.store, s.maker))

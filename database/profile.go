@@ -42,6 +42,21 @@ func (s *PostgresStore) UpdateProfile(user_id int, req *models.UpdateProfile) (i
 	return user_id, nil
 }
 
+func (s *PostgresStore) DoesUserProfileExist(userID int) (bool, error) {
+	// Hazırlanan SQL sorgusu
+	query := "SELECT COUNT(*) FROM user_profiles WHERE user_id = $1"
+
+	// SQL sorgusunu çalıştır ve sonucu al
+	var profileCount int
+	err := s.DB.QueryRow(query, userID).Scan(&profileCount)
+	if err != nil {
+		return false, err
+	}
+
+	// Eğer profil sayısı 1 ise profil var demektir
+	return profileCount == 1, nil
+}
+
 func scanIntoAccountsProfile(rows *sql.Rows) (*models.QueryUserProfile, error) {
 
 	var i models.QueryUserProfile

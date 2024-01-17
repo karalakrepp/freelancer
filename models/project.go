@@ -68,4 +68,5 @@ type FilterNeededData struct {
 	Owner       OwnerInfo
 	Price       float64
 	Category    int
+	Status      string
 }

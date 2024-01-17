@@ -23,6 +23,22 @@ func (s *ApiService) CreateUserProfile(w http.ResponseWriter, r *http.Request) e
 		http.Error(w, "Invalid userID", http.StatusBadRequest)
 
 	}
+
+	exists, err := s.store.DoesUserProfileExist(userID)
+	fmt.Println(exists)
+	if err != nil {
+		// Handle the error (e.g., database error)
+		http.Error(w, "Error checking user profile existence", http.StatusInternalServerError)
+
+	}
+
+	if exists {
+		// Handle the case where the user profile exists
+		return WriteJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"code":    http.StatusBadRequest,
+			"message": "User profile already exists",
+		})
+	}
 	var req = new(models.CreateUserProfileReq)
 
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {

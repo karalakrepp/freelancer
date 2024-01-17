@@ -25,6 +25,7 @@ type Storage interface {
 	CreateProfile(models.CreateUserProfileReq, string) (*models.UserProfile, error)
 	GetProfile(int) (*models.QueryUserProfile, error)
 	UpdateProfile(int, *models.UpdateProfile) (int, error)
+	DoesUserProfileExist(int) (bool, error)
 
 	UpdateBalance(userID int, newBalance float64) error
 
@@ -39,6 +40,7 @@ type Storage interface {
 	GetProjectByCategoryID(int) (*[]models.FilterNeededData, error)
 	GetProjectByOwnerID(int) (*[]models.FilterNeededData, error)
 	GetProjectByID(int) (*models.FilterNeededData, error)
+	DeleteProject(int) error
 
 	GetUserCompletedProject(id int) (int, error)
 
